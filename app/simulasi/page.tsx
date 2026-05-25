@@ -1,22 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { officeRooms } from "@/data/rooms";
 import OfficeRoomBlock from "@/components/simulation/OfficeRoomBlock";
 import Minimap from "@/components/simulation/Minimap";
 import RoomDetail from "@/components/simulation/RoomDetail";
 import Modal from "@/components/ui/Modal";
 import SectionHeading from "@/components/ui/SectionHeading";
-import ProgressBar from "@/components/ui/ProgressBar";
 import Badge from "@/components/ui/Badge";
 import { useLocalProgress } from "@/hooks/useLocalProgress";
 import { useSound } from "@/hooks/useSound";
-import { CheckCircle2, MousePointerClick } from "lucide-react";
+import {
+  CheckCircle2,
+  Eye,
+  Layers,
+  MousePointerClick,
+  Compass,
+} from "lucide-react";
 
 export default function SimulasiPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [visited, setVisited] = useState<Set<string>>(new Set());
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const { update } = useLocalProgress();
   const { play } = useSound();
 
@@ -36,8 +42,11 @@ export default function SimulasiPage() {
   };
 
   return (
-    <section className="relative">
-      <div className="absolute inset-0 bg-grid opacity-50 pointer-events-none" />
+    <section className="relative min-h-screen overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 bg-grid opacity-40 pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-brand-500/10 dark:bg-brand-500/5 rounded-full blur-[120px] pointer-events-none" />
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <SectionHeading
           eyebrow="Simulasi Interaktif"
@@ -45,78 +54,200 @@ export default function SimulasiPage() {
           subtitle="Klik tiap ruangan untuk melihat fungsi, deskripsi, dan aktivitas yang berlangsung di dalamnya."
         />
 
-        {/* Toolbar */}
-        <div className="mt-10 grid lg:grid-cols-[1fr_auto] gap-4 items-end">
-          <div className="rounded-3xl glass p-5">
-            <div className="flex flex-wrap items-center gap-3 mb-2">
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3"
+        >
+          <StatCard
+            icon={<Eye className="w-4 h-4" />}
+            label="Dijelajahi"
+            value={`${visitedCount}/${totalRooms}`}
+            color="brand"
+          />
+          <StatCard
+            icon={<Layers className="w-4 h-4" />}
+            label="Total Ruangan"
+            value={String(totalRooms)}
+            color="sky"
+          />
+          <StatCard
+            icon={<Compass className="w-4 h-4" />}
+            label="Progress"
+            value={`${percent}%`}
+            color="indigo"
+          />
+          <StatCard
+            icon={<CheckCircle2 className="w-4 h-4" />}
+            label="Status"
+            value={percent === 100 ? "Selesai!" : "Menjelajah"}
+            color="teal"
+          />
+        </motion.div>
+
+        {/* Achievement */}
+        <AnimatePresence>
+          {percent === 100 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-orange-500/10 border border-amber-300/30 dark:border-amber-500/20 text-center"
+            >
+              <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
+                🏆 Achievement Unlocked: Office Explorer — Semua ruangan telah dijelajahi!
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main Floor Plan + Minimap */}
+        <div className="mt-8 grid lg:grid-cols-[1fr_200px] gap-4 items-start">
+          {/* Floor Plan */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="rounded-[2rem] glass-strong p-4 sm:p-6 relative overflow-hidden"
+          >
+            {/* Decorative corner accents */}
+            <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-brand-400/30 rounded-tl-[2rem] pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-brand-400/30 rounded-br-[2rem] pointer-events-none" />
+
+            <div className="flex justify-between items-center mb-5 px-2">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-brand-gradient grid place-items-center text-white shadow-glow">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    Floor Plan — Lantai 1
+                  </p>
+                  <p className="text-[10px] text-slate-400">6 Ruangan • Skala Ilustratif</p>
+                </div>
+              </div>
               <Badge tone="brand">
                 <MousePointerClick className="w-3 h-3" />
                 Interaktif
               </Badge>
-              <Badge tone="success">
-                <CheckCircle2 className="w-3 h-3" />
-                {visitedCount}/{totalRooms} ruangan dijelajahi
-              </Badge>
-              {percent === 100 && (
-                <Badge tone="warn">🏆 Achievement: Office Explorer</Badge>
-              )}
             </div>
-            <ProgressBar value={percent} label="Progress eksplorasi" />
+
+            {/* Grid Floor */}
+            <div
+              className="relative grid gap-2.5 sm:gap-3 rounded-2xl p-3 sm:p-4 border border-brand-200/40 dark:border-white/10 bg-gradient-to-br from-slate-50/80 via-brand-50/40 to-sky-50/60 dark:from-white/[0.03] dark:via-brand-950/20 dark:to-sky-950/10"
+              style={{
+                gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+                gridTemplateRows: "repeat(4, minmax(72px, auto))",
+              }}
+            >
+              {/* Entry indicator */}
+              <div className="absolute -top-3 left-6 px-3 py-1 rounded-full text-[10px] font-bold bg-white dark:bg-ink-700 border border-brand-300 dark:border-brand-600 text-brand-700 dark:text-brand-300 shadow-glass flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                Pintu Masuk
+              </div>
+
+              {officeRooms.map((r, i) => (
+                <OfficeRoomBlock
+                  key={r.id}
+                  room={r}
+                  active={activeId === r.id}
+                  visited={visited.has(r.id)}
+                  hovered={hoveredId === r.id}
+                  onClick={() => handleSelect(r.id)}
+                  onHover={(h) => setHoveredId(h ? r.id : null)}
+                  index={i}
+                />
+              ))}
+            </div>
+
+            {/* Bottom hint */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
+              Klik ruangan untuk membuka detail lengkap
+            </div>
+          </motion.div>
+
+          {/* Sidebar: Minimap + Legend */}
+          <div className="space-y-4">
+            <Minimap rooms={officeRooms} activeId={activeId} visited={visited} onSelect={handleSelect} />
+
+            {/* Legend */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="rounded-2xl glass p-4"
+            >
+              <p className="text-[10px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-3">
+                Legenda
+              </p>
+              <div className="space-y-2">
+                {officeRooms.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => handleSelect(r.id)}
+                    className="flex items-center gap-2 w-full text-left group"
+                  >
+                    <span className={`w-2.5 h-2.5 rounded-sm shrink-0 ${colorDot(r.color)}`} />
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400 group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors truncate">
+                      {r.name}
+                    </span>
+                    {visited.has(r.id) && (
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500 ml-auto shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </div>
-          <Minimap rooms={officeRooms} activeId={activeId} onSelect={handleSelect} />
         </div>
-
-        {/* Floor plan */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mt-6 rounded-[2rem] glass-strong p-4 sm:p-6"
-        >
-          <div className="flex justify-between items-center mb-4 px-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              🏢 Floor Plan — Lantai 1
-            </p>
-            <p className="text-[10px] text-slate-400">Skala: ilustratif</p>
-          </div>
-
-          <div
-            className="relative grid gap-2 sm:gap-3 bg-brand-50/60 dark:bg-white/5 rounded-2xl p-3 sm:p-4 border border-brand-200/50 dark:border-white/10"
-            style={{
-              gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-              gridTemplateRows: "repeat(4, minmax(64px, auto))",
-            }}
-          >
-            {/* dotted entry indicator */}
-            <div className="absolute -top-3 left-6 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white dark:bg-ink-700 border border-brand-300 text-brand-700 dark:text-brand-300 shadow-glass">
-              Pintu Masuk ↓
-            </div>
-
-            {officeRooms.map((r, i) => (
-              <OfficeRoomBlock
-                key={r.id}
-                room={r}
-                active={activeId === r.id}
-                onClick={() => handleSelect(r.id)}
-                index={i}
-              />
-            ))}
-          </div>
-
-          <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
-            💡 Klik tiap ruangan untuk membuka detail. Semakin banyak ruangan
-            yang kamu jelajahi, semakin banyak yang kamu pelajari.
-          </p>
-        </motion.div>
       </div>
 
-      <Modal
-        open={!!active}
-        onClose={() => setActiveId(null)}
-        title={undefined}
-      >
+      <Modal open={!!active} onClose={() => setActiveId(null)} title={undefined}>
         {active && <RoomDetail room={active} />}
       </Modal>
     </section>
   );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  color: string;
+}) {
+  const gradients: Record<string, string> = {
+    brand: "from-brand-600 to-brand-400",
+    sky: "from-sky-500 to-sky-400",
+    indigo: "from-indigo-600 to-brand-500",
+    teal: "from-teal-500 to-cyan-400",
+  };
+  return (
+    <div className="rounded-2xl glass p-4 group hover:shadow-glass-lg transition-all">
+      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${gradients[color]} grid place-items-center text-white mb-2 shadow-glow group-hover:scale-110 transition-transform`}>
+        {icon}
+      </div>
+      <p className="text-lg font-extrabold text-slate-800 dark:text-white">{value}</p>
+      <p className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium">{label}</p>
+    </div>
+  );
+}
+
+function colorDot(color: string) {
+  const map: Record<string, string> = {
+    brand: "bg-brand-500",
+    sky: "bg-sky-500",
+    indigo: "bg-indigo-500",
+    cyan: "bg-cyan-500",
+    blue: "bg-brand-700",
+    teal: "bg-teal-500",
+  };
+  return map[color] ?? "bg-slate-400";
 }

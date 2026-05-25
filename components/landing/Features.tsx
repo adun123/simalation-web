@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import * as Icons from "lucide-react";
 import { features } from "@/data/features";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { cn } from "@/lib/utils";
+import { getIcon } from "@/lib/icons";
 
 const toneBg: Record<string, string> = {
   brand: "from-brand-500 to-brand-700",
@@ -25,8 +25,7 @@ export default function Features() {
 
         <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((f, i) => {
-            const Icon = (Icons[f.icon as keyof typeof Icons] ??
-              Icons.Sparkles) as React.ComponentType<{ className?: string }>;
+            const Icon = getIcon(f.icon);
             return (
               <motion.div
                 key={f.title}

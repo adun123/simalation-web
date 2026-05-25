@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import * as Icons from "lucide-react";
 import type { MateriItem } from "@/types";
 import { cn } from "@/lib/utils";
+import { getIcon } from "@/lib/icons";
 
 interface Props {
   items: MateriItem[];
@@ -17,8 +17,7 @@ export default function Accordion({ items }: Props) {
   return (
     <div className="space-y-4">
       {items.map((item, idx) => {
-        const Icon = (Icons[item.icon as keyof typeof Icons] ??
-          Icons.BookOpen) as React.ComponentType<{ className?: string }>;
+        const Icon = getIcon(item.icon);
         const isOpen = openId === item.id;
         return (
           <motion.div

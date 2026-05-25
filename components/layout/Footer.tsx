@@ -46,7 +46,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div>
+        {/* <div>
           <h4 className="font-semibold mb-3 text-slate-900 dark:text-white">
             Kontak
           </h4>
@@ -58,13 +58,13 @@ export default function Footer() {
               <Github className="w-4 h-4" /> github.com/uas-project
             </li>
           </ul>
-        </div>
+        </div> */}
       </div>
       <div className="border-t border-white/40 dark:border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row justify-between gap-2">
+        {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row justify-between gap-2">
           <p>© {new Date().getFullYear()} TataLetak.id — Proyek UAS.</p>
           <p>Built with Next.js, Tailwind & Framer Motion.</p>
-        </div>
+        </div> */}
       </div>
     </footer>
   );

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { materiData } from "@/data/materi";
 import Accordion from "@/components/materi/Accordion";
 import SectionHeading from "@/components/ui/SectionHeading";
-import * as Icons from "lucide-react";
+import { getIcon } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Materi Pembelajaran",
@@ -24,8 +24,7 @@ export default function MateriPage() {
         {/* Quick info cards */}
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {materiData.map((m) => {
-            const Icon = (Icons[m.icon as keyof typeof Icons] ??
-              Icons.BookOpen) as React.ComponentType<{ className?: string }>;
+            const Icon = getIcon(m.icon);
             return (
               <a
                 key={m.id}
