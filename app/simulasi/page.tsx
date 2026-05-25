@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { officeRooms } from "@/data/rooms";
+import { layoutConfigs, type LayoutMode } from "@/data/rooms";
 import OfficeRoomBlock from "@/components/simulation/OfficeRoomBlock";
 import Minimap from "@/components/simulation/Minimap";
 import RoomDetail from "@/components/simulation/RoomDetail";
@@ -19,21 +19,37 @@ import {
   Compass,
 } from "lucide-react";
 
+const modes: { id: LayoutMode; label: string }[] = [
+  { id: "open-plan", label: "Open Plan" },
+  { id: "closed-plan", label: "Closed Plan" },
+  { id: "semi-open", label: "Semi Open" },
+  { id: "activity-based", label: "Activity Based" },
+];
+
 export default function SimulasiPage() {
+  const [mode, setMode] = useState<LayoutMode>("open-plan");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [visited, setVisited] = useState<Set<string>>(new Set());
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const { update } = useLocalProgress();
   const { play } = useSound();
 
-  const active = officeRooms.find((r) => r.id === activeId) ?? null;
-  const totalRooms = officeRooms.length;
+  const config = layoutConfigs[mode];
+  const rooms = config.rooms;
+  const active = rooms.find((r) => r.id === activeId) ?? null;
+  const totalRooms = rooms.length;
   const visitedCount = visited.size;
   const percent = Math.round((visitedCount / totalRooms) * 100);
 
   useEffect(() => {
     update("simulasi", percent);
   }, [percent, update]);
+
+  // Reset visited when mode changes
+  useEffect(() => {
+    setVisited(new Set());
+    setActiveId(null);
+  }, [mode]);
 
   const handleSelect = (id: string) => {
     play("click");
@@ -43,7 +59,6 @@ export default function SimulasiPage() {
 
   return (
     <section className="relative min-h-screen overflow-hidden">
-      {/* Animated background */}
       <div className="absolute inset-0 bg-grid opacity-40 pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-brand-500/10 dark:bg-brand-500/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -51,40 +66,52 @@ export default function SimulasiPage() {
         <SectionHeading
           eyebrow="Simulasi Interaktif"
           title="Jelajahi Tata Letak Kantor"
-          subtitle="Klik tiap ruangan untuk melihat fungsi, deskripsi, dan aktivitas yang berlangsung di dalamnya."
+          subtitle="Pilih jenis tata letak, lalu klik tiap ruangan untuk melihat fungsi dan aktivitasnya."
         />
+
+        {/* Mode Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mt-8 flex flex-wrap gap-2 justify-center"
+        >
+          {modes.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setMode(m.id)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                mode === m.id
+                  ? "bg-brand-600 text-white shadow-glow"
+                  : "glass text-slate-700 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-white/10"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Layout description */}
+        <motion.p
+          key={mode}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-3 text-center text-sm text-slate-500 dark:text-slate-400"
+        >
+          {config.description}
+        </motion.p>
 
         {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3"
+          className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3"
         >
-          <StatCard
-            icon={<Eye className="w-4 h-4" />}
-            label="Dijelajahi"
-            value={`${visitedCount}/${totalRooms}`}
-            color="brand"
-          />
-          <StatCard
-            icon={<Layers className="w-4 h-4" />}
-            label="Total Ruangan"
-            value={String(totalRooms)}
-            color="sky"
-          />
-          <StatCard
-            icon={<Compass className="w-4 h-4" />}
-            label="Progress"
-            value={`${percent}%`}
-            color="indigo"
-          />
-          <StatCard
-            icon={<CheckCircle2 className="w-4 h-4" />}
-            label="Status"
-            value={percent === 100 ? "Selesai!" : "Menjelajah"}
-            color="teal"
-          />
+          <StatCard icon={<Eye className="w-4 h-4" />} label="Dijelajahi" value={`${visitedCount}/${totalRooms}`} color="brand" />
+          <StatCard icon={<Layers className="w-4 h-4" />} label="Total Ruangan" value={String(totalRooms)} color="sky" />
+          <StatCard icon={<Compass className="w-4 h-4" />} label="Progress" value={`${percent}%`} color="indigo" />
+          <StatCard icon={<CheckCircle2 className="w-4 h-4" />} label="Status" value={percent === 100 ? "Selesai!" : "Menjelajah"} color="teal" />
         </motion.div>
 
         {/* Achievement */}
@@ -105,14 +132,13 @@ export default function SimulasiPage() {
 
         {/* Main Floor Plan + Minimap */}
         <div className="mt-8 grid lg:grid-cols-[1fr_200px] gap-4 items-start">
-          {/* Floor Plan */}
           <motion.div
+            key={mode}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 0.5 }}
             className="rounded-[2rem] glass-strong p-4 sm:p-6 relative overflow-hidden"
           >
-            {/* Decorative corner accents */}
             <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-brand-400/30 rounded-tl-[2rem] pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-brand-400/30 rounded-br-[2rem] pointer-events-none" />
 
@@ -123,9 +149,9 @@ export default function SimulasiPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    Floor Plan — Lantai 1
+                    {config.name}
                   </p>
-                  <p className="text-[10px] text-slate-400">6 Ruangan • Skala Ilustratif</p>
+                  <p className="text-[10px] text-slate-400">{rooms.length} Ruangan • Skala Ilustratif</p>
                 </div>
               </div>
               <Badge tone="brand">
@@ -134,21 +160,19 @@ export default function SimulasiPage() {
               </Badge>
             </div>
 
-            {/* Grid Floor */}
             <div
               className="relative grid gap-2.5 sm:gap-3 rounded-2xl p-3 sm:p-4 border border-brand-200/40 dark:border-white/10 bg-gradient-to-br from-slate-50/80 via-brand-50/40 to-sky-50/60 dark:from-white/[0.03] dark:via-brand-950/20 dark:to-sky-950/10"
               style={{
-                gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-                gridTemplateRows: "repeat(4, minmax(72px, auto))",
+                gridTemplateColumns: `repeat(${config.gridCols}, minmax(0, 1fr))`,
+                gridTemplateRows: `repeat(${config.gridRows}, minmax(72px, auto))`,
               }}
             >
-              {/* Entry indicator */}
               <div className="absolute -top-3 left-6 px-3 py-1 rounded-full text-[10px] font-bold bg-white dark:bg-ink-700 border border-brand-300 dark:border-brand-600 text-brand-700 dark:text-brand-300 shadow-glass flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                 Pintu Masuk
               </div>
 
-              {officeRooms.map((r, i) => (
+              {rooms.map((r, i) => (
                 <OfficeRoomBlock
                   key={r.id}
                   room={r}
@@ -162,18 +186,15 @@ export default function SimulasiPage() {
               ))}
             </div>
 
-            {/* Bottom hint */}
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
               Klik ruangan untuk membuka detail lengkap
             </div>
           </motion.div>
 
-          {/* Sidebar: Minimap + Legend */}
+          {/* Sidebar */}
           <div className="space-y-4">
-            <Minimap rooms={officeRooms} activeId={activeId} visited={visited} onSelect={handleSelect} />
-
-            {/* Legend */}
+            <Minimap rooms={rooms} activeId={activeId} visited={visited} onSelect={handleSelect} />
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -184,7 +205,7 @@ export default function SimulasiPage() {
                 Legenda
               </p>
               <div className="space-y-2">
-                {officeRooms.map((r) => (
+                {rooms.map((r) => (
                   <button
                     key={r.id}
                     onClick={() => handleSelect(r.id)}
@@ -212,17 +233,7 @@ export default function SimulasiPage() {
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  color: string;
-}) {
+function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
   const gradients: Record<string, string> = {
     brand: "from-brand-600 to-brand-400",
     sky: "from-sky-500 to-sky-400",

@@ -2,12 +2,22 @@
 
 export type Tone = "brand" | "sky" | "success" | "warn" | "danger";
 
+export interface LayoutSubItem {
+  name: string;
+  image: string; // path ke /images/layouts/
+  diagramType: "open-plan" | "closed-plan" | "semi-open" | "activity-based";
+  description: string;
+  kelebihan: string[];
+  kekurangan: string[];
+}
+
 export interface MateriItem {
   id: string;
   title: string;
   summary: string;
   icon: string;
   body: string[];
+  layouts?: LayoutSubItem[];
 }
 
 export interface OfficeRoom {
@@ -28,6 +38,8 @@ export interface DraggableBlock {
   ideal: { row: number; col: number };
   hint: string;
   icon: string;
+  /** Feedback kontekstual saat posisi salah, berdasarkan zona */
+  wrongZoneFeedback?: Record<string, string>;
 }
 
 export interface QuizQuestion {

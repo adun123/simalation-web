@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, CheckCircle2, XCircle } from "lucide-react";
 import type { MateriItem } from "@/types";
 import { cn } from "@/lib/utils";
 import { getIcon } from "@/lib/icons";
+import LayoutDiagram from "./LayoutDiagram";
 
 interface Props {
   items: MateriItem[];
@@ -68,6 +69,59 @@ export default function Accordion({ items }: Props) {
                         {p}
                       </p>
                     ))}
+
+                    {/* Layout sub-items */}
+                    {item.layouts && (
+                      <div className="mt-6 space-y-6 pl-0 sm:pl-16">
+                        {item.layouts.map((layout, i) => (
+                          <div
+                            key={i}
+                            className="rounded-2xl bg-white/50 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 p-4 sm:p-5 space-y-4"
+                          >
+                            <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
+                              {layout.name}
+                            </h4>
+
+                            {/* Diagram denah */}
+                            <LayoutDiagram type={layout.diagramType} />
+
+                            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                              {layout.description}
+                            </p>
+
+                            {/* Kelebihan & Kekurangan */}
+                            <div className="grid sm:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                                  Kelebihan
+                                </h5>
+                                <ul className="space-y-1.5">
+                                  {layout.kelebihan.map((k, ki) => (
+                                    <li key={ki} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                                      <span>{k}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div className="space-y-2">
+                                <h5 className="text-xs font-bold uppercase tracking-wider text-red-500 dark:text-red-400">
+                                  Kekurangan
+                                </h5>
+                                <ul className="space-y-1.5">
+                                  {layout.kekurangan.map((k, ki) => (
+                                    <li key={ki} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                                      <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                                      <span>{k}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

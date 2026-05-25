@@ -7,10 +7,12 @@ interface Props {
   id: string;
   row: number;
   col: number;
+  zoneLabel?: string;
+  isEntrance?: boolean;
   children?: React.ReactNode;
 }
 
-export default function DropCell({ id, row, col, children }: Props) {
+export default function DropCell({ id, row, col, zoneLabel, isEntrance, children }: Props) {
   const { isOver, setNodeRef } = useDroppable({ id });
 
   return (
@@ -20,12 +22,30 @@ export default function DropCell({ id, row, col, children }: Props) {
         "relative rounded-2xl border-2 border-dashed transition-all duration-200 min-h-[96px] flex items-center justify-center p-2",
         isOver
           ? "border-brand-500 bg-brand-100/70 dark:bg-brand-500/15 scale-[1.02] shadow-[0_0_12px_rgba(59,130,246,0.2)]"
-          : "border-slate-300/60 dark:border-white/10 bg-white/40 dark:bg-white/[0.03] hover:border-brand-300 dark:hover:border-brand-700 hover:bg-brand-50/30 dark:hover:bg-brand-950/10"
+          : "border-slate-300/60 dark:border-white/10 bg-white/40 dark:bg-white/[0.03] hover:border-brand-300 dark:hover:border-brand-700 hover:bg-brand-50/30 dark:hover:bg-brand-950/10",
+        isEntrance && "border-green-400/60 dark:border-green-600/40"
       )}
       data-row={row}
       data-col={col}
     >
-      {!children && (
+      {/* Zone label */}
+      {zoneLabel && !children && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none">
+          <span className="text-[9px] sm:text-[10px] font-semibold text-slate-400/80 dark:text-slate-500/80 uppercase tracking-wider">
+            {zoneLabel}
+          </span>
+        </div>
+      )}
+
+      {/* Entrance indicator */}
+      {isEntrance && (
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[8px] font-bold bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 flex items-center gap-1 whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+          Pintu Masuk
+        </div>
+      )}
+
+      {!children && !zoneLabel && (
         <div className="flex flex-col items-center gap-1">
           <div className={cn(
             "w-6 h-6 rounded-lg grid place-items-center transition-colors",
@@ -39,7 +59,6 @@ export default function DropCell({ id, row, col, children }: Props) {
       )}
       {children}
 
-      {/* Hover indicator dots */}
       {isOver && (
         <>
           <span className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />

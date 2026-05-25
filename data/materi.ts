@@ -39,6 +39,84 @@ export const materiData: MateriItem[] = [
       "Tata letak gabungan (semi open): Memadukan ruang terbuka untuk kolaborasi dan ruang tertutup untuk pekerjaan yang membutuhkan konsentrasi.",
       "Tata letak berbasis aktivitas (Activity Based Working): Karyawan memilih area kerja sesuai jenis aktivitas (focus, kolaborasi, santai).",
     ],
+    layouts: [
+      {
+        name: "Tata Letak Terbuka (Open Plan)",
+        image: "/images/layouts/open-plan.jpeg",
+        diagramType: "open-plan",
+        description:
+          "Semua karyawan bekerja dalam satu ruangan besar tanpa sekat permanen. Cocok untuk tim yang membutuhkan komunikasi intensif.",
+        kelebihan: [
+          "Memudahkan komunikasi dan koordinasi antar karyawan",
+          "Biaya pembangunan lebih hemat (tanpa sekat)",
+          "Pengawasan oleh atasan lebih mudah",
+          "Fleksibel dalam penataan ulang furniture",
+        ],
+        kekurangan: [
+          "Tingkat kebisingan tinggi",
+          "Kurang privasi bagi karyawan",
+          "Mudah terganggu konsentrasi",
+          "Risiko penyebaran penyakit lebih tinggi",
+        ],
+      },
+      {
+        name: "Tata Letak Tertutup (Closed Plan)",
+        image: "/images/layouts/close-plan.jpeg",
+        diagramType: "closed-plan",
+        description:
+          "Tiap divisi atau individu memiliki ruangan sendiri yang dipisahkan oleh dinding permanen.",
+        kelebihan: [
+          "Privasi tinggi untuk pekerjaan rahasia",
+          "Konsentrasi kerja lebih terjaga",
+          "Mengurangi kebisingan antar ruangan",
+          "Cocok untuk pekerjaan yang membutuhkan fokus tinggi",
+        ],
+        kekurangan: [
+          "Biaya pembangunan dan perawatan lebih mahal",
+          "Komunikasi antar divisi kurang lancar",
+          "Pengawasan lebih sulit dilakukan",
+          "Penggunaan ruang kurang efisien",
+        ],
+      },
+      {
+        name: "Tata Letak Gabungan (Semi Open)",
+        image: "/images/layouts/semi-open.jpeg",
+        diagramType: "semi-open",
+        description:
+          "Kombinasi ruang terbuka untuk kolaborasi dan ruang tertutup untuk pekerjaan yang membutuhkan konsentrasi.",
+        kelebihan: [
+          "Keseimbangan antara kolaborasi dan privasi",
+          "Fleksibel sesuai kebutuhan aktivitas",
+          "Efisiensi ruang lebih optimal",
+          "Karyawan bisa memilih area sesuai kebutuhan",
+        ],
+        kekurangan: [
+          "Perencanaan desain lebih kompleks",
+          "Biaya lebih tinggi dari open plan",
+          "Perlu aturan penggunaan ruang yang jelas",
+          "Potensi ketimpangan fasilitas antar area",
+        ],
+      },
+      {
+        name: "Tata Letak Berbasis Aktivitas (Activity Based Working)",
+        image: "/images/layouts/activity-based.jpeg",
+        diagramType: "activity-based",
+        description:
+          "Konsep modern di mana karyawan tidak memiliki meja tetap, melainkan memilih area kerja sesuai jenis aktivitas.",
+        kelebihan: [
+          "Sangat fleksibel dan adaptif",
+          "Mendorong kreativitas dan kolaborasi",
+          "Efisiensi penggunaan ruang maksimal",
+          "Cocok untuk generasi kerja modern",
+        ],
+        kekurangan: [
+          "Karyawan tidak punya ruang personal tetap",
+          "Butuh teknologi pendukung (laptop, cloud)",
+          "Perlu budaya kerja yang matang",
+          "Tidak cocok untuk semua jenis pekerjaan",
+        ],
+      },
+    ],
   },
   {
     id: "fungsi-divisi",
