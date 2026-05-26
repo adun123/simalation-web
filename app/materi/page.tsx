@@ -3,6 +3,8 @@ import { materiData } from "@/data/materi";
 import Accordion from "@/components/materi/Accordion";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { getIcon } from "@/lib/icons";
+import { getMateriList } from "@/lib/supabase/queries";
+import type { MateriItem } from "@/types";
 
 export const metadata: Metadata = {
   title: "Materi Pembelajaran",
@@ -10,7 +12,28 @@ export const metadata: Metadata = {
     "Kumpulan materi tata letak kantor: pengertian, tujuan, jenis, dan fungsi divisi.",
 };
 
-export default function MateriPage() {
+export const revalidate = 60; // ISR: revalidate setiap 60 detik
+
+async function getMateri(): Promise<MateriItem[]> {
+  try {
+    const data = await getMateriList();
+    if (data.length > 0) {
+      return data.map((d: Record<string, unknown>) => ({
+        id: (d.slug as string) || (d.id as string),
+        title: d.title as string,
+        summary: d.summary as string,
+        icon: d.icon as string,
+        body: d.body as string[],
+        layouts: d.layouts as MateriItem["layouts"],
+      }));
+    }
+  } catch {}
+  return materiData;
+}
+
+export default async function MateriPage() {
+  const items = await getMateri();
+
   return (
     <section className="relative">
       <div className="absolute inset-0 bg-grid opacity-50 pointer-events-none" />
@@ -23,7 +46,7 @@ export default function MateriPage() {
 
         {/* Quick info cards */}
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {materiData.map((m) => {
+          {items.map((m) => {
             const Icon = getIcon(m.icon);
             return (
               <a
@@ -42,8 +65,8 @@ export default function MateriPage() {
           })}
         </div>
 
-        <div id={materiData[0]?.id} className="mt-12">
-          <Accordion items={materiData} />
+        <div id={items[0]?.id} className="mt-12">
+          <Accordion items={items} />
         </div>
       </div>
     </section>

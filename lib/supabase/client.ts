@@ -1,11 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-/**
- * Supabase client (client-side).
- *
- * The app works fully with dummy data when env vars are not set.
- * Returns `null` if Supabase is not configured so callers can fall back gracefully.
- */
 let _client: SupabaseClient | null | undefined;
 
 export function getSupabaseClient(): SupabaseClient | null {
@@ -17,7 +11,7 @@ export function getSupabaseClient(): SupabaseClient | null {
     return _client;
   }
   _client = createClient(url, anon, {
-    auth: { persistSession: false },
+    auth: { persistSession: true },
   });
   return _client;
 }
