@@ -2,19 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Send } from "lucide-react";
-import { quizQuestions } from "@/data/quiz";
+import { ArrowLeft, ArrowRight, Send, Loader2 } from "lucide-react";
+import { quizQuestions as staticQuestions } from "@/data/quiz";
+import { getQuizQuestions, saveQuizResult } from "@/lib/supabase/queries";
 import QuizCard from "@/components/quiz/QuizCard";
 import QuizResultModal from "@/components/quiz/QuizResultModal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ProgressBar from "@/components/ui/ProgressBar";
 import Button from "@/components/ui/Button";
 import { formatScore } from "@/lib/utils";
-import { saveQuizResult } from "@/lib/supabase/queries";
 import { useLocalProgress } from "@/hooks/useLocalProgress";
 import { useSound } from "@/hooks/useSound";
+import type { QuizQuestion } from "@/types";
 
 export default function QuizPage() {
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [showAnswer, setShowAnswer] = useState(false);
@@ -22,28 +25,48 @@ export default function QuizPage() {
   const { update } = useLocalProgress();
   const { play } = useSound();
 
-  const total = quizQuestions.length;
-  const current = quizQuestions[step];
-  const selected = answers[current.id];
+  // Fetch quiz dari Supabase, fallback ke data statis
+  useEffect(() => {
+    getQuizQuestions()
+      .then((data) => {
+        if (data.length > 0) {
+          setQuestions(
+            data.map((d: Record<string, unknown>) => ({
+              id: d.id as string,
+              question: d.question as string,
+              options: d.options as string[],
+              correctIndex: d.correct_index as number,
+              explanation: d.explanation as string,
+            }))
+          );
+        } else {
+          setQuestions(staticQuestions);
+        }
+      })
+      .catch(() => setQuestions(staticQuestions))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const total = questions.length;
+  const current = questions[step];
+  const selected = current ? answers[current.id] : undefined;
 
   const correct = useMemo(
-    () =>
-      quizQuestions.filter((q) => answers[q.id] === q.correctIndex).length,
-    [answers]
+    () => questions.filter((q) => answers[q.id] === q.correctIndex).length,
+    [answers, questions]
   );
   const score = formatScore(correct, total);
-  const progressPercent = Math.round(((step + (showAnswer ? 1 : 0)) / total) * 100);
+  const progressPercent = total > 0 ? Math.round(((step + (showAnswer ? 1 : 0)) / total) * 100) : 0;
 
   useEffect(() => {
     if (showResult) {
       update("quiz", score);
-      // fire and forget
       saveQuizResult({ score, correct, total }).catch(() => {});
     }
   }, [showResult, score, correct, total, update]);
 
   function selectOption(i: number) {
-    if (showAnswer) return;
+    if (showAnswer || !current) return;
     play("click");
     setAnswers((prev) => ({ ...prev, [current.id]: i }));
   }
@@ -78,6 +101,18 @@ export default function QuizPage() {
     setShowAnswer(false);
     setShowResult(false);
   }
+
+  if (loading) {
+    return (
+      <section className="relative">
+        <div className="max-w-3xl mx-auto px-4 py-16 flex justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+        </div>
+      </section>
+    );
+  }
+
+  if (!current) return null;
 
   return (
     <section className="relative">
