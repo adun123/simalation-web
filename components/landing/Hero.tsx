@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, PlayCircle } from "lucide-react";
 import AnimatedOffice from "./AnimatedOffice";
 
-export default function Hero() {
+export default function Hero({ quizCount = 8 }: { quizCount?: number }) {
   return (
     <section className="relative overflow-hidden">
       {/* Decorative background */}
@@ -71,7 +71,7 @@ export default function Hero() {
           >
             {[
               { v: "6+", l: "Ruangan" },
-              { v: "8", l: "Soal Quiz" },
+              { v: String(quizCount), l: "Soal Quiz" },
               { v: "100%", l: "Interaktif" },
             ].map((s) => (
               <div
